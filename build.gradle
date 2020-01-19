@@ -64,6 +64,9 @@ dependencies {
     compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: "$coroutinesVersion"
     compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-reactor', version: "$coroutinesVersion"
     compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-slf4j', version: "$coroutinesVersion"
+
+    compile "io.projectreactor.kotlin:reactor-kotlin-extensions:1.0.2.RELEASE"
+
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-actuator

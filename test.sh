@@ -8,7 +8,7 @@ curl -i -X POST \
 printf "\nfailed go"
 
 curl -i -X POST \
-   -H "tenant:properTenant" \
+   -H "tenant:properTenant1" \
    -H "Content-Type:application/json" \
    -d \
 '{"value":21312}' \

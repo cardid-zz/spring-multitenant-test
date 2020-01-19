@@ -1,43 +1,42 @@
 package testApplication.tenant.filter
 
-import testApplication.tenant.multi.TenantContext
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
+import org.springframework.context.annotation.Configuration
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import reactor.util.context.Context
+import testApplication.tenant.multi.SubscriberContext
+import testApplication.tenant.multi.TenantContext
+import java.util.function.Function
 
 
-@Component
-class TenantFilter (
-    private val tenantContext: TenantContext
-) : WebFilter {
+@Configuration
+class TenantFilter : WebFilter {
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    private val tenantHeader = "tenant"
 
     override fun filter(
         serverWebExchange: ServerWebExchange,
         webFilterChain: WebFilterChain
     ): Mono<Void> {
-        val tenant = serverWebExchange.request.headers[tenantHeader]
 
-
-        if (tenant.isNullOrEmpty()) {
-            setTenant(TenantContext.DEFAULT)
-        } else {
-            setTenant(tenant.first())
+        if (!serverWebExchange.request.headers.containsKey(TenantContext.HEADER)) {
+            return webFilterChain.filter(serverWebExchange)
         }
+
+        val tenant = serverWebExchange.request.headers[TenantContext.HEADER]?.get(0)!!
+
         logger.debug("[d] currentThread =  ${Thread.currentThread()}")
-        return webFilterChain.filter(serverWebExchange)
-    }
 
-    private fun setTenant(tenant: String) {
-        try {
-            tenantContext.set(tenant)
-        } catch (e: Exception) {
-            throw RuntimeException()
-        }
+        return SubscriberContext.contextSubscriber(
+            applyContext = Function { context: Context ->
+                if (!context.hasKey(TenantContext::class.java)) {
+                    context.put(TenantContext::class.java, TenantContext(tenant))
+                } else {
+                    context
+                }
+            }
+            , chain = webFilterChain, exchange = serverWebExchange)
     }
 }
